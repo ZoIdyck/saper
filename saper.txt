@@ -1,0 +1,223 @@
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+
+using namespace std;
+
+struct Pole
+{
+ bool jestMina;
+ bool poleOdkryte;
+ bool jestFlaga;
+ int liczbaMin;
+};
+
+
+
+
+class Plansza
+{
+    Pole poleGry[22][22];
+ int wysokosc;
+ int szerokosc;
+
+ void przydziel_miny();
+
+ int licz_miny(int x,int y);
+ char zawartosc_pola(int x, int y);
+ void masowka();
+
+
+public:
+
+    Plansza(int x,int y);
+
+ void pokaz_plansze();
+ bool czy_gra_przegrana();
+ bool czy_gra_wygrana();
+ void ustaw_flage(int x,int y);
+ void odkryj(int x,int y);
+
+};
+
+Plansza::Plansza(int x,int y)
+{
+    {
+        wysokosc=x;
+ szerokosc=y;
+ for(int i=0;i<22;i++)
+        {
+            for(int l=0;l<22;l++)
+            {   poleGry[i][l].jestMina=0;
+ poleGry[i][l].poleOdkryte=0;
+ poleGry[i][l].jestFlaga=0;
+
+ }
+        }
+        przydziel_miny();
+ }
+}
+
+int Plansza::licz_miny(int x,int y)
+{
+    poleGry[x][y].liczbaMin=0;
+ if(poleGry[x-1][y-1].jestMina==1) poleGry[x][y].liczbaMin+=1;
+ if(poleGry[x-1][y].jestMina==1) poleGry[x][y].liczbaMin+=1;
+ if(poleGry[x-1][y+1].jestMina==1) poleGry[x][y].liczbaMin+=1;
+ if(poleGry[x][y-1].jestMina==1) poleGry[x][y].liczbaMin+=1;
+ if(poleGry[x][y+1].jestMina==1) poleGry[x][y].liczbaMin+=1;
+ if(poleGry[x+1][y-1].jestMina==1) poleGry[x][y].liczbaMin+=1;
+ if(poleGry[x+1][y].jestMina==1) poleGry[x][y].liczbaMin+=1;
+ if(poleGry[x+1][y+1].jestMina==1) poleGry[x][y].liczbaMin+=1;
+ return poleGry[x][y].liczbaMin;
+}
+void Plansza::przydziel_miny()
+{
+    int t=(wysokosc*szerokosc)/5;
+ srand(time(NULL));
+ for(int i=0;i<t;i++)
+    { poleGry[rand()%wysokosc+1][rand()%szerokosc+1].jestMina=1;  }
+}
+void Plansza::odkryj(int x,int y)
+{
+    poleGry[x][y].poleOdkryte=1;
+ masowka();
+}
+void Plansza::ustaw_flage(int x, int y)
+{
+
+    if(poleGry[x][y].poleOdkryte==0)
+    {
+        if (poleGry[x][y].jestFlaga == 1) { poleGry[x][y].jestFlaga = 0; }
+        else if (poleGry[x][y].jestFlaga == 0) { poleGry[x][y].jestFlaga = 1; }
+    }
+
+
+}
+bool Plansza::czy_gra_przegrana()
+{
+    for(int i=1;i<=wysokosc;i++)
+    {
+        for(int l=1;l<=szerokosc;l++)
+        {
+            if(poleGry[i][l].jestMina==1 && poleGry[i][l].poleOdkryte==1)
+            {
+                return 1;
+ }
+        }
+    }
+    return 0;
+}
+bool Plansza::czy_gra_wygrana()
+{
+    int b=0,c=0;
+
+ for(int i=1;i<=wysokosc;i++)
+    {
+        for(int l=1;l<=szerokosc;l++)
+        {
+            if(poleGry[i][l].jestMina==1) {b++;}
+            if(poleGry[i][l].poleOdkryte==1) {c++;}
+            if(wysokosc*szerokosc==c+b) {return 1;}
+
+
+
+        }
+    }
+    return 0;
+
+
+}
+char Plansza::zawartosc_pola(int a, int b)
+{
+    if(poleGry[a][b].poleOdkryte==1 && poleGry[a][b].jestMina==1) {return 'X';}
+    else if(poleGry[a][b].poleOdkryte==0 && poleGry[a][b].jestFlaga==0) return '_';
+ else if(poleGry[a][b].jestFlaga==1) {return 'F';}
+    else if(poleGry[a][b].poleOdkryte==1 && licz_miny(a,b)!=0 && poleGry[a][b].jestFlaga==0)
+    {   char c='0';
+ c=licz_miny(a,b)+'0';
+ return c;}
+    else if(poleGry[a][b].poleOdkryte==1 && licz_miny(a,b)==0 && poleGry[a][b].jestFlaga==0) {return ' ';}
+    return 'B';
+}
+void Plansza::pokaz_plansze()
+{
+    for(int i=1;i<=wysokosc;i++)
+    {
+        for(int l=1;l<=szerokosc;l++)
+        {cout<<'['<<zawartosc_pola(i,l)<<']';}
+        cout<<endl;
+ }
+}
+void Plansza::masowka()
+{
+    for(int e=0;e<20;e++) {
+        for (int i = 1; i < wysokosc + 1; i++) {
+            for (int l = 1; l < szerokosc + 1; l++) {
+                if (poleGry[i][l].poleOdkryte == 1 && licz_miny(i, l) == 0 && poleGry[i][l].jestMina==0) {
+                    poleGry[i + 1][l + 1].poleOdkryte = 1;
+ poleGry[i + 1][l].poleOdkryte = 1;
+ poleGry[i + 1][l - 1].poleOdkryte = 1;
+ poleGry[i][l + 1].poleOdkryte = 1;
+ poleGry[i][l - 1].poleOdkryte = 1;
+ poleGry[i - 1][l + 1].poleOdkryte = 1;
+ poleGry[i - 1][l].poleOdkryte = 1;
+ poleGry[i - 1][l - 1].poleOdkryte = 1;
+ }
+            }
+        }
+    }
+
+
+
+}
+
+int main()
+{
+    int x,y,z,a,b;
+ cout<<"Ustal wielkosc planszy (max 20x20)! ;"<<endl<<"Podaj wysokosc: ";
+ cin>>x;
+ cout<<"Podaj szerokosc: ";
+ cin>>y;
+ Plansza obiekt(x,y);
+ cout<<"1. ODKRYJ POLE"<<endl;
+ cout<<"2. USTAW FLAGE"<<endl;
+
+
+
+ for(int i=0;i<10;i--)
+    {
+        obiekt.pokaz_plansze();
+ cin>>z;
+ switch(z)
+        {
+            case 1:
+                cout<<"Wiersz :";
+ cin>>a;
+ cout<<"Kolumna :";
+ cin>>b;
+ obiekt.odkryj(a,b);
+ if(obiekt.czy_gra_przegrana()==1) {i=100;}
+                if(obiekt.czy_gra_wygrana()==1) {i=100;}
+                break;
+ case 2:
+                cout<<"Wiersz :";
+ cin>>a;
+ cout<<"Kolumna :";
+ cin>>b;
+ obiekt.ustaw_flage(a,b);
+ break;
+ default:
+                break;
+ }
+    }
+
+
+    obiekt.pokaz_plansze();
+ if(obiekt.czy_gra_wygrana()==1)
+    { cout<<"Wygrales,serdecznie gratuluje skilla ;)"<<endl;}
+    if(obiekt.czy_gra_przegrana()==1)
+    { cout<<"NIESTETY PRZEGRALES, MOZE UDA SIE NASTEPNYM RAZEM ;)"<<endl;}
+
+    return 0;
+}
